@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
 import { useStatistic } from '../context/StatisticContext';
-import { DocumentTextIcon } from '@heroicons/react/20/solid';
+import { DocumentTextIcon, HeartIcon } from '@heroicons/react/20/solid';
+import { HeartIcon as OutlineHeart } from "@heroicons/react/24/outline";
+
 import Pagination from './Pagination';
 
 interface Statistic {
@@ -21,7 +23,7 @@ interface SearchBarProps {
 
 const useSearch = () => {
     const [query, setQuery] = useState('');
-    const { searchResults, setSearchResults, currentPage, setCurrentPage } = useStatistic();
+    const { searchResults, setSearchResults, currentPage, setCurrentPage, } = useStatistic();
     const [isError, setIsError] = useState(false);
     const itemsPerPage = 6;
 
@@ -67,7 +69,7 @@ const useSearch = () => {
 
 
 const SearchBar: React.FC<SearchBarProps> = ({ data }) => {
-    const { setSelectedStatistic, currentPage } = useStatistic();
+    const { setSelectedStatistic, currentPage, favorites, addToFavorites, removeFromFavorites } = useStatistic();
     const {
         query,
         setQuery,
@@ -99,6 +101,11 @@ const SearchBar: React.FC<SearchBarProps> = ({ data }) => {
         setSelectedStatistic(updatedStatistic);
     };
 
+    const isFavorite = (statistic: Statistic, favorites: Statistic[]) => {
+        return favorites.some((fav) => fav.identifier === statistic.identifier);
+    };
+
+
     return (
         <div className="search-bar">
             <form onSubmit={handleSubmit} className="search-form">
@@ -119,13 +126,24 @@ const SearchBar: React.FC<SearchBarProps> = ({ data }) => {
 
             <ul className="result-list">
                 {getVisibleItems().map((statistic) => (
-                    <Link key={statistic.identifier} onClick={() => handleClick(statistic)} to={`/detail`} className="result-item">
+                    <div className="result-item" key={statistic.identifier} >
+                        <div className='result-actions'>
+                            {isFavorite(statistic, favorites) ? (
+                                <HeartIcon className="h-5 w-5 flex-shrink-0 text-red-500" onClick={() => removeFromFavorites(statistic.identifier)} />
+                            ) : (
+                                <OutlineHeart className="h-5 w-5 flex-shrink-0 text-gray-400" onClick={() => addToFavorites(statistic)} />
+                            )}
+                        </div>
                         <div className='max-width'>
                             <div className='result-date-icon'>
                                 <DocumentTextIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
                                 <span className='text-md font-semibold text-gray-800' >{moment(statistic.date).format('DD MMMM YYYY')}</span>
                             </div>
-                            <div className='result-header'><p className="text-md font-semibold text-gray-800">{statistic.title}</p>
+                            <div className='result-header'><p className="text-md font-semibold text-gray-800">
+                                <Link onClick={() => handleClick(statistic)} to={`/detail`} >
+                                    {statistic.title}
+                                </Link>
+                            </p>
                             </div>
                             <div className='result-badge'>
                                 {statistic.premium === 1 && (
@@ -135,8 +153,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ data }) => {
                                 )}
                             </div>
                         </div>
-
-                    </Link>
+                    </div>
                 ))}
                 {isError && (
                     <li className="error-item">
@@ -144,10 +161,6 @@ const SearchBar: React.FC<SearchBarProps> = ({ data }) => {
                     </li>
                 )}
             </ul>
-
-
-
-
             {totalPages > 1 && (
                 <Pagination
                     totalPages={totalPages}

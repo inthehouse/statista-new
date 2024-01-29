@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import SearchBar from '../components/SearchBar';
+import { Link } from 'react-router-dom';
 
 interface Statistic {
     identifier: string;
@@ -49,9 +50,14 @@ class IndexPage extends Component {
         }
 
         return (
-            <div style={{ margin: '0 auto', padding: '16px' }}>
-                <SearchBar data={statistics?.items || []} />
-            </div>
+            <>
+                <Link to="/favorites" className="favorites-button">
+                    Favorites
+                </Link>
+                <div style={{ margin: '0 auto', padding: '16px' }}>
+                    <SearchBar data={statistics?.items || []} />
+                </div>
+            </>
         );
     }
 }

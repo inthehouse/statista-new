@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 
 import IndexPage from './pages/index';
 import DetailPage from './pages/detail';
+import Favorites from './pages/favorites';
 
 import './App.css';
 
@@ -15,10 +16,10 @@ function App(): JSX.Element {
       <div className="App">
         <QueryClientProvider client={queryClient}>
           <StatisticProvider>
-            {/* Provide your children components here */}
             <Routes>
               <Route path="/" element={<IndexPage />} />
               <Route path="/detail" element={<DetailPage />} />
+              <Route path="/favorites" element={<Favorites />} />
             </Routes>
           </StatisticProvider>
         </QueryClientProvider>

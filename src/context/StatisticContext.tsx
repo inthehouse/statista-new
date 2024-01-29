@@ -1,5 +1,4 @@
-// StatisticContext.tsx
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 interface Statistic {
     identifier: string;
@@ -18,6 +17,9 @@ interface StatisticContextProps {
     setSearchResults: React.Dispatch<React.SetStateAction<Statistic[]>>;
     currentPage: number;
     setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+    favorites: Statistic[];
+    addToFavorites: (statistic: Statistic) => void;
+    removeFromFavorites: (identifier: string) => void;
 }
 
 const StatisticContext = createContext<StatisticContextProps | undefined>(undefined);
@@ -30,8 +32,31 @@ const StatisticProvider: React.FC<StatisticProviderProps> = ({ children }) => {
     const [selectedStatistic, setSelectedStatistic] = useState<Statistic | null>(null);
     const [searchResults, setSearchResults] = useState<Statistic[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
+    const [favorites, setFavorites] = useState<Statistic[]>(JSON.parse(localStorage.getItem('favorites') || '[]'));
+
+    useEffect(() => {
+        const storedFavorites = localStorage.getItem('favorites');
+        if (storedFavorites) {
+            setFavorites(JSON.parse(storedFavorites));
+        }
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+    }, [favorites]);
+
+    const addToFavorites = (statistic: Statistic) => {
+        if (!favorites.some((fav) => fav.identifier === statistic.identifier)) {
+            setFavorites((prevFavorites) => [...prevFavorites, statistic]);
+        }
+    };
+
+    const removeFromFavorites = (identifier: string) => {
+        setFavorites((prevFavorites) => prevFavorites.filter((fav) => fav.identifier !== identifier));
+    };
+
     return (
-        <StatisticContext.Provider value={{ selectedStatistic, setSelectedStatistic, searchResults, setSearchResults, currentPage, setCurrentPage }}>
+        <StatisticContext.Provider value={{ selectedStatistic, setSelectedStatistic, searchResults, setSearchResults, currentPage, setCurrentPage, favorites, addToFavorites, removeFromFavorites }}>
             {children}
         </StatisticContext.Provider>
     );
